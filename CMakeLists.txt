@@ -27,3 +27,13 @@ set(HEADERS
 add_executable(vlex ${SOURCES} ${HEADERS})
 target_include_directories(vlex PRIVATE include)
 target_compile_features(vlex PRIVATE cxx_std_20)
+
+function(vlex_generate target cfg src inc)
+    add_custom_command(
+        OUTPUT ${inc}/Lexer.h ${src}/Lexer.cpp ${inc}/SourceLocation.h ${src}/SourceLocation.cpp ${inc}/Token.h ${src}/Token.cpp
+        PRE_BUILD
+        DEPENDS ${target} ${cfg}
+        COMMAND ${target} ${cfg} ${src} ${inc}
+    )
+    target_sources(${target} PRIVATE ${inc}/Lexer.h ${src}/Lexer.cpp ${inc}/SourceLocation.h ${src}/SourceLocation.cpp ${inc}/Token.h ${src}/Token.cpp)
+endfunction()

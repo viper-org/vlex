@@ -3,6 +3,7 @@
 #include "generator/Generator.h"
 
 #include "templates/IdentifierParseCPP.h"
+#include "templates/IntegerLiteralParseCPP.h"
 #include "templates/KeywordParseCPP.h"
 #include "templates/Lexer1CPP.h"
 #include "templates/Lexer2CPP.h"
@@ -242,7 +243,11 @@ namespace lexer
             {
                 stream << templates::IdentifierParseCPP;
             }
-            // TODO: Literals
+            else if (special == "_integer_literal")
+            {
+                stream << templates::IntegerLiteralParseCPP;
+            }
+            // TODO: String Literals
         }
     }
 

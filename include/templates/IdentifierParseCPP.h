@@ -18,7 +18,8 @@ namespace templates
             }
             
             return Token(std::move(text), TokenType::Identifier, start, mSourceLocation);
-        })";
+        }
+)";
 }
 
 #endif // VLEX_TEMPLATES_IDENTIFIER_PARSE_CPP_H

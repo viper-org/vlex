@@ -1,6 +1,6 @@
 tokens {
     +
     -
-    *===
     func
+    _integer_literal
 }

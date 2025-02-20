@@ -32,8 +32,8 @@ function(vlex_generate target cfg src inc)
     add_custom_command(
         OUTPUT ${inc}/Lexer.h ${src}/Lexer.cpp ${inc}/SourceLocation.h ${src}/SourceLocation.cpp ${inc}/Token.h ${src}/Token.cpp
         PRE_BUILD
-        DEPENDS ${target} ${cfg}
-        COMMAND ${target} ${cfg} ${src} ${inc}
+        DEPENDS ${cfg}
+        COMMAND vlex ${cfg} ${src} ${inc}
     )
     target_sources(${target} PRIVATE ${inc}/Lexer.h ${src}/Lexer.cpp ${inc}/SourceLocation.h ${src}/SourceLocation.cpp ${inc}/Token.h ${src}/Token.cpp)
 endfunction()

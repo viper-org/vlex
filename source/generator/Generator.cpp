@@ -81,11 +81,11 @@ namespace generator
     {
         if (!std::filesystem::exists(outsource))
         {
-            std::filesystem::create_directory(outsource);
+            std::filesystem::create_directories(outsource);
         }
         if (!std::filesystem::exists(outinc))
         {
-            std::filesystem::create_directory(outinc);
+            std::filesystem::create_directories(outinc);
         }
 
         generateSourceLocation(outsource, outinc);

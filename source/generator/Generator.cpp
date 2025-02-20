@@ -152,7 +152,7 @@ namespace lexer
                 std::exit(1);
             }
         }
-        tokenH << "\n\t\tEndOfFile,\n\t\tError\n\t}\n";
+        tokenH << "\n\t\tEndOfFile,\n\t\tError\n\t};\n";
 
         tokenH << templates::TokenH;
         tokenH.close();

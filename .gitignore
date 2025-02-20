@@ -1,0 +1,9 @@
+CMakeFiles/
+.cache/
+
+*.cmake
+Makefile
+
+vlex
+CMakeCache.txt
+*.json

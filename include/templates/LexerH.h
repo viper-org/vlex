@@ -1,4 +1,9 @@
+#ifndef VLEX_TEMPLATES_LEXER_H_H
+#define VLEX_TEMPLATES_LEXER_H_H 1
 
+namespace templates
+{
+    constexpr const char* LexerH = R"(
 #include <istream>
 #include <optional>
 #include <string>
@@ -36,4 +41,7 @@ namespace lexer
     };
 }
 
-#endif // VLEX_GENERATED_LEXER_LEXER_H
+#endif // VLEX_GENERATED_LEXER_LEXER_H)";
+}
+
+#endif // VLEX_TEMPLATES_LEXER_H_H

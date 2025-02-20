@@ -2,6 +2,17 @@
 
 #include "generator/Generator.h"
 
+#include "templates/IdentifierParseCPP.h"
+#include "templates/KeywordParseCPP.h"
+#include "templates/Lexer1CPP.h"
+#include "templates/Lexer2CPP.h"
+#include "templates/LexerH.h"
+#include "templates/SourceLocationCPP.h"
+#include "templates/SourceLocationH.h"
+#include "templates/Token1CPP.h"
+#include "templates/Token2CPP.h"
+#include "templates/TokenH.h"
+
 #include <algorithm>
 #include <format>
 #include <fstream>
@@ -84,28 +95,19 @@ namespace generator
 
     void Generator::generateSourceLocation(std::filesystem::path outsource, std::filesystem::path outinc)
     {
-        std::ifstream templateFile;
-        
         std::ofstream sourceLocationH = std::ofstream(outinc / "SourceLocation.h");
-        templateFile.open("templates/SourceLocation.h");
-        sourceLocationH << templateFile.rdbuf();
-        templateFile.close();
+        sourceLocationH << templates::SourceLocationH;
         sourceLocationH.close();
 
         std::ofstream sourceLocationCPP = std::ofstream(outsource / "SourceLocation.cpp");
-        templateFile.open("templates/SourceLocation.cpp");
         sourceLocationCPP << std::format("#include \"{}\"\n", (outinc / "SourceLocation.h").string());
-        sourceLocationCPP << templateFile.rdbuf();
-        templateFile.close();
+        sourceLocationCPP << templates::SourceLocationCPP;
         sourceLocationCPP.close();
     }
 
     void Generator::generateToken(std::filesystem::path outsource, std::filesystem::path outinc)
     {
-        std::ifstream templateFile;
-        
         std::ofstream tokenH = std::ofstream(outinc / "Token.h");
-        templateFile.open("templates/Token.h");
         tokenH << std::format(R"(#ifndef VLEX_GENERATED_LEXER_TOKEN_H
 #define VLEX_GENERATED_LEXER_TOKEN_H
 
@@ -152,16 +154,13 @@ namespace lexer
         }
         tokenH << "\n\t\tEndOfFile,\n\t\tError\n\t}\n";
 
-        tokenH << templateFile.rdbuf();
-        templateFile.close();
+        tokenH << templates::TokenH;
         tokenH.close();
 
 
         std::ofstream tokenCPP = std::ofstream(outsource / "Token.cpp");
-        templateFile.open("templates/Token1.cpp");
         tokenCPP << std::format("#include \"{}\"\n", (outinc / "Token.h").string());
-        tokenCPP << templateFile.rdbuf();
-        templateFile.close();
+        tokenCPP << templates::Token1CPP;
         for (auto keyword : mKeywords)
         {
             std::string tokenType = keyword;
@@ -191,35 +190,27 @@ namespace lexer
         tokenCPP << "\t\t\tcase TokenType::EndOfFile:\n\t\t\t\treturn \"eof\";\n";
         tokenCPP << "\t\t\tcase TokenType::Error:\n\t\t\t\treturn \"Error\";\n";
 
-        templateFile.open("templates/Token2.cpp");
-        tokenCPP << templateFile.rdbuf();
-        templateFile.close();
+        tokenCPP << templates::Token2CPP;
         tokenCPP.close();
     }
 
     void Generator::generateLexer(std::filesystem::path outsource, std::filesystem::path outinc)
     {
-        std::ifstream templateFile;
-
         std::ofstream lexerH = std::ofstream(outinc / "Lexer.h");
-        templateFile.open("templates/Lexer1.cpp");
         lexerH << std::format(R"(#ifndef VLEX_GENERATED_LEXER_LEXER_H
 #define VLEX_GENERATED_LEXER_LEXER_H 1
 
 #include "{}"
 )", (outinc / "SourceLocation.h").string());
-        lexerH << templateFile.rdbuf();
-        templateFile.close();
+        lexerH << templates::LexerH;
         lexerH.close();
 
 
         std::ofstream lexerCPP = std::ofstream(outsource / "Lexer.cpp");
-        templateFile.open("templates/Lexer1.cpp");
         lexerCPP << std::format(R"(#include "{}"
 #include "{}"
 )", (outinc / "Lexer.h").string(), (outinc / "Token.h").string());
-        lexerCPP << templateFile.rdbuf();
-        templateFile.close();
+        lexerCPP << templates::Lexer1CPP;
 
         for (auto& keyword : mKeywords)
         {
@@ -229,16 +220,13 @@ namespace lexer
             lexerCPP << std::format("\t\t{{ \"{}\", TokenType::{} }},\n", keyword, tokenType);
         }
         lexerCPP << "\t};\n";
-        templateFile.open("templates/Lexer2.cpp");
-        lexerCPP << templateFile.rdbuf();
-        templateFile.close();
+        lexerCPP << templates::Lexer2CPP;
         generateSpecials(lexerCPP);
         
         // Generate logic for keywords
         if (std::find(mSpecials.begin(), mSpecials.end(), "_identifier") == mSpecials.end())
         {
-            templateFile.open("templates/KeywordParse.cpp");
-            lexerCPP << templateFile.rdbuf();
+            lexerCPP << templates::KeywordParseCPP;
         }
 
         generateSymbols(lexerCPP);
@@ -252,15 +240,9 @@ namespace lexer
         {
             if (special == "_identifier")
             {
-                std::ifstream templateFile("templates/IdentifierParse.cpp");
-                stream << templateFile.rdbuf();
+                stream << templates::IdentifierParseCPP;
             }
-            else if (special == "_integer_literal")
-            {
-                std::ifstream templateFile("templates/IntegerLiteralParse.cpp");
-                stream << templateFile.rdbuf();
-            }
-            // TODO: String literals
+            // TODO: Literals
         }
     }
 

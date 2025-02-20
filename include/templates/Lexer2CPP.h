@@ -1,4 +1,9 @@
+#ifndef VLEX_TEMPLATES_LEXER_2_CPP_H
+#define VLEX_TEMPLATES_LEXER_2_CPP_H 1
 
+namespace templates
+{
+    constexpr const char* Lexer2CPP = R"(
 
     std::vector<Token> Lexer::lex()
     {
@@ -45,3 +50,7 @@
     std::optional<Token> Lexer::getNextToken()
     {
         SourceLocation start = mSourceLocation;
+)";
+}
+
+#endif // VLEX_TEMPLATES_LEXER_2_CPP_H

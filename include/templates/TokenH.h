@@ -1,4 +1,9 @@
+#ifndef VLEX_TEMPLATES_TOKEN_H_H
+#define VLEX_TEMPLATES_TOKEN_H_H 1
 
+namespace templates
+{
+    constexpr const char* TokenH = R"(
     class Token
     {
     public:
@@ -20,4 +25,7 @@
     };
 }
 
-#endif // VLEX_GENERATED_LEXER_TOKEN_H
+#endif // VLEX_GENERATED_LEXER_TOKEN_H)";
+}
+
+#endif // VLEX_TEMPLATES_TOKEN_H_H

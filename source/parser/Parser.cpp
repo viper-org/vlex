@@ -15,17 +15,17 @@ namespace parser
         parseTokens();
     }
     
-    std::vector<std::string> Parser::getSymbols()
+    std::vector<TokenDescriptor> Parser::getSymbols()
     {
         return mSymbols;
     }
     
-    std::vector<std::string> Parser::getKeywords()
+    std::vector<TokenDescriptor> Parser::getKeywords()
     {
         return mKeywords;
     }
     
-    std::vector<std::string> Parser::getSpecials()
+    std::vector<TokenDescriptor> Parser::getSpecials()
     {
         return mSpecials;
     }
@@ -103,19 +103,32 @@ namespace parser
         {
             text += std::string(consume().getText());
         }
-        mSymbols.push_back(text);
+
+        std::optional<std::string> tokenType;
+        if (current().getTokenType() == lexer::TokenType::Identifier)
+        {
+            tokenType = consume().getText();
+        }
+        mSymbols.push_back({ text, tokenType });
     }
 
     void Parser::parseIdentifier()
     {
         std::string text = std::string(consume().getText());
+
+        std::optional<std::string> tokenType;
+        if (current().getTokenType() == lexer::TokenType::Identifier)
+        {
+            tokenType = consume().getText();
+        }
+
         if (text[0] == '_') // Special case
         {
-            mSpecials.push_back(text);
+            mSpecials.push_back({ text, tokenType });
         }
         else
         {
-            mKeywords.push_back(text);
+            mKeywords.push_back({ text, tokenType });
         }
     }
 }

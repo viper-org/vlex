@@ -2,6 +2,8 @@
 
 #include "generator/Generator.h"
 
+#include "parser/Parser.h"
+
 #include "templates/IdentifierParseCPP.h"
 #include "templates/IntegerLiteralParseCPP.h"
 #include "templates/KeywordParseCPP.h"
@@ -23,35 +25,66 @@
 
 namespace generator
 {
-    Generator::Generator(std::vector<std::string> symbols, std::vector<std::string> keywords, std::vector<std::string> specials)
+    Generator::Generator(std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials)
         : mSymbols(std::move(symbols))
         , mKeywords(std::move(keywords))
         , mSpecials(std::move(specials))
     {
-        std::sort(mSymbols.begin(), mSymbols.end());
+        //std::sort(mSymbols.begin(), mSymbols.end(), [](auto& a, auto& b) {
+        //    return a.syntax <=> b.syntax == std::strong_ordering::less;
+        //});
         for (auto& symbol : mSymbols)
         {
-            if (symbol.size() == 1)
+            if (symbol.syntax.size() == 1)
             {
-                mSymbolNodes.push_back(std::make_unique<Symbol>(symbol, std::vector<Symbol*>(), nullptr));
+                std::string tokenType;
+                if (symbol.tokenType)
+                {
+                    tokenType = *symbol.tokenType;
+                }
+                else
+                {
+                    tokenType = symbolToName(symbol.syntax);
+                }
+
+                mSymbolNodes.push_back(std::make_unique<Symbol>(symbol.syntax, tokenType, std::vector<Symbol*>(), nullptr));
             }
             else
             {
                 auto it = std::find_if(mSymbolNodes.begin(), mSymbolNodes.end(), [&symbol](const auto& node) {
-                    return symbol.substr(0, symbol.size() - 1) == node->text;
+                    return symbol.syntax.substr(0, symbol.syntax.size() - 1) == node->text;
                 });
 
                 if (it != mSymbolNodes.end())
                 {
                     auto parent = it->get();
 
-                    mSymbolNodes.push_back(std::make_unique<Symbol>(symbol, std::vector<Symbol*>(), parent));
+                    std::string tokenType;
+                    if (symbol.tokenType)
+                    {
+                        tokenType = *symbol.tokenType;
+                    }
+                    else
+                    {
+                        tokenType = symbolToName(symbol.syntax);
+                    }
+
+                    mSymbolNodes.push_back(std::make_unique<Symbol>(symbol.syntax, tokenType, std::vector<Symbol*>(), parent));
                     parent->children.push_back(mSymbolNodes.back().get());
                 }
                 else
                 {
-                    mSymbolNodes.push_back(std::make_unique<Symbol>(symbol, std::vector<Symbol*>(), nullptr));
-                    std::string sym = symbol.substr(0, symbol.size() - 1);
+                    std::string tokenType;
+                    if (symbol.tokenType)
+                    {
+                        tokenType = *symbol.tokenType;
+                    }
+                    else
+                    {
+                        tokenType = symbolToName(symbol.syntax);
+                    }
+                    mSymbolNodes.push_back(std::make_unique<Symbol>(symbol.syntax, tokenType, std::vector<Symbol*>(), nullptr));
+                    std::string sym = symbol.syntax.substr(0, symbol.syntax.size() - 1);
                     Symbol* prev = mSymbolNodes.back().get();
 
                     while (!sym.empty())
@@ -67,7 +100,7 @@ namespace generator
                             break;
                         }
 
-                        mSymbolNodes.push_back(std::make_unique<Symbol>(sym, std::vector<Symbol*>{prev}, nullptr));
+                        mSymbolNodes.push_back(std::make_unique<Symbol>(sym, "Error", std::vector<Symbol*>{prev}, nullptr));
                         mSymbolNodes.back()->error = true;
                         prev->parent = mSymbolNodes.back().get();
                         prev = prev->parent;
@@ -95,7 +128,7 @@ namespace generator
 
         std::filesystem::remove(outinc / ".gitignore");
         std::filesystem::remove(outsource / ".gitignore");
-        
+
         std::ofstream incGitignore = std::ofstream(outinc / ".gitignore", std::ios::app);
         incGitignore << R"(Token.h
 Lexer.h
@@ -136,36 +169,69 @@ namespace lexer
     {{
 )", (outinc / "SourceLocation.h").string());
 
-        for (auto keyword : mKeywords)
+        std::vector<std::string> tokenTypes;
+        for (auto& keyword : mKeywords)
         {
-            keyword[0] = toupper(keyword[0]);
-            keyword += "Keyword";
-            tokenH << std::format("\t\t{},\n", keyword);
-        }
-        if (!mKeywords.empty()) tokenH << "\n";
-        for (auto& symbol : mSymbols)
-        {
-            tokenH << std::format("\t\t{},\n", symbolToName(symbol));
-        }
-        for (auto& special : mSpecials)
-        {
-            if (special == "_identifier")
+            std::string tokenType;
+            if (keyword.tokenType)
             {
-                tokenH << "\t\tIdentifier,\n";
-            }
-            else if (special == "_integer_literal")
-            {
-                tokenH << "\t\tIntegerLiteral,\n";
-            }
-            else if (special == "_string_literal")
-            {
-                tokenH << "\t\tStringLiteral,\n";
+                tokenType = *keyword.tokenType;
             }
             else
             {
-                std::cerr << "Unknown special identifier " << special << "\n";
+                tokenType = keyword.syntax + "Keyword";
+                tokenType[0] = toupper(keyword.syntax[0]);
+            }
+            if (std::find(tokenTypes.begin(), tokenTypes.end(), tokenType) == tokenTypes.end())
+            {
+                tokenTypes.push_back(tokenType);
+            }
+        }
+        for (auto& symbol : mSymbols)
+        {
+            std::string tokenType;
+            if (symbol.tokenType)
+            {
+                tokenType = *symbol.tokenType;
+            }
+            else
+            {
+                tokenType = symbolToName(symbol.syntax);
+            }
+            if (std::find(tokenTypes.begin(), tokenTypes.end(), tokenType) == tokenTypes.end())
+            {
+                tokenTypes.push_back(tokenType);
+            }
+        }
+        for (auto& special : mSpecials)
+        {
+            std::string tokenType;
+            if (special.syntax == "_identifier")
+            {
+                tokenType = special.tokenType?*special.tokenType:"Identifier";
+            }
+            else if (special.syntax == "_integer_literal")
+            {
+                tokenType = special.tokenType?*special.tokenType:"IntegerLiteral";
+            }
+            else if (special.syntax == "_string_literal")
+            {
+                tokenType = special.tokenType?*special.tokenType:"StringLiteral";
+            }
+            else
+            {
+                std::cerr << "Unknown special identifier " << special.syntax << "\n";
                 std::exit(1);
             }
+
+            if (std::find(tokenTypes.begin(), tokenTypes.end(), tokenType) == tokenTypes.end())
+            {
+                tokenTypes.push_back(tokenType);
+            }
+        }
+        for (auto& tokenType : tokenTypes)
+        {
+            tokenH << std::format("\t\t{},\n", tokenType);
         }
         tokenH << "\n\t\tEndOfFile,\n\t\tError\n\t};\n";
 
@@ -178,28 +244,45 @@ namespace lexer
         tokenCPP << templates::Token1CPP;
         for (auto keyword : mKeywords)
         {
-            std::string tokenType = keyword;
-            tokenType[0] = toupper(keyword[0]);
-            tokenType += "Keyword";
-            tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", tokenType, keyword);
+            std::string tokenType;
+            if (keyword.tokenType)
+            {
+                tokenType = *keyword.tokenType;
+            }
+            else
+            {
+                tokenType = keyword.syntax;
+                tokenType[0] = toupper(keyword.syntax[0]);
+                tokenType += "Keyword";
+            }
+            tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", tokenType, keyword.syntax);
         }
         for (auto& symbol : mSymbols)
         {
-            tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", symbolToName(symbol), symbol);
+            std::string tokenType;
+            if (symbol.tokenType)
+            {
+                tokenType = *symbol.tokenType;
+            }
+            else
+            {
+                tokenType = symbolToName(symbol.syntax);
+            }
+            tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", tokenType, symbol.syntax);
         }
         for (auto& special : mSpecials)
         {
-            if (special == "_identifier")
+            if (special.syntax == "_identifier")
             {
-                tokenCPP << "\t\t\tcase TokenType::Identifier:\n\t\t\t\treturn \"an identifier\";\n";
+                tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"an identifier\";\n", special.tokenType?*special.tokenType:"Identifier");
             }
-            else if (special == "_integer_literal")
+            else if (special.syntax == "_integer_literal")
             {
-                tokenCPP << "\t\t\tcase TokenType::IntegerLiteral:\n\t\t\t\treturn \"integer literal\";\n";
+                tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"integer literal\";\n", special.tokenType?*special.tokenType:"IntegerLiteral");
             }
-            else if (special == "_string_literal")
+            else if (special.syntax == "_string_literal")
             {
-                tokenCPP << "\t\t\tcase TokenType::StringLiteral:\n\t\t\t\treturn \"string literal\";\n";
+                tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"string literal\";\n", special.tokenType?*special.tokenType:"StringLiteral");
             }
         }
         tokenCPP << "\t\t\tcase TokenType::EndOfFile:\n\t\t\t\treturn \"eof\";\n";
@@ -229,17 +312,27 @@ namespace lexer
 
         for (auto& keyword : mKeywords)
         {
-            std::string tokenType = keyword;
-            tokenType[0] = toupper(keyword[0]);
-            tokenType += "Keyword";
-            lexerCPP << std::format("\t\t{{ \"{}\", TokenType::{} }},\n", keyword, tokenType);
+            std::string tokenType;
+            if (keyword.tokenType)
+            {
+                tokenType = *keyword.tokenType;
+            }
+            else
+            {
+                tokenType = keyword.syntax;
+                tokenType[0] = toupper(keyword.syntax[0]);
+                tokenType += "Keyword";
+            }
+            lexerCPP << std::format("\t\t{{ \"{}\", TokenType::{} }},\n", keyword.syntax, tokenType);
         }
         lexerCPP << "\t};\n";
         lexerCPP << templates::Lexer2CPP;
         generateSpecials(lexerCPP);
         
         // Generate logic for keywords
-        if (std::find(mSpecials.begin(), mSpecials.end(), "_identifier") == mSpecials.end())
+        if (std::find_if(mSpecials.begin(), mSpecials.end(), [](auto& special){
+            return special.syntax == "_identifier";
+        }) == mSpecials.end())
         {
             lexerCPP << templates::KeywordParseCPP;
         }
@@ -248,18 +341,17 @@ namespace lexer
         lexerCPP << "\n\t}\n}";
     }
 
-
     void Generator::generateSpecials(std::ofstream& stream)
     {
         for (auto& special : mSpecials)
         {
-            if (special == "_identifier")
+            if (special.syntax == "_identifier")
             {
-                stream << templates::IdentifierParseCPP;
+                stream << std::format(templates::IdentifierParseCPP, special.tokenType?*special.tokenType:"Identifier");
             }
-            else if (special == "_integer_literal")
+            else if (special.syntax == "_integer_literal")
             {
-                stream << templates::IntegerLiteralParseCPP;
+                stream << std::format(templates::IntegerLiteralParseCPP, special.tokenType?*special.tokenType:"IntegerLiteral");
             }
             // TODO: String Literals
         }
@@ -289,7 +381,7 @@ namespace lexer
                             {
                                 stream << std::format("consume();\n\t\t\t\t{}", std::string(idx, '\t'));
                             }
-                            stream << std::format("return Token(\"{}\", TokenType::{}, start, mSourceLocation);", sym->text, sym->error?"Error":symbolToName(sym->text));
+                            stream << std::format("return Token(\"{}\", TokenType::{}, start, mSourceLocation);", sym->text, sym->tokenType);
                         }
                         stream << std::format("\n\t\t\t{0}}}\n\t\t\t{0}", std::string(idx, '\t'));
                     };
@@ -298,7 +390,7 @@ namespace lexer
                         doOne(child, 1);
                     }
                 }
-                stream << std::format("return Token(\"{}\", TokenType::{}, start, mSourceLocation);\n", node->text, node->error?"Error":symbolToName(node->text));
+                stream << std::format("return Token(\"{}\", TokenType::{}, start, mSourceLocation);\n", node->text, node->tokenType);
             }
         }
 

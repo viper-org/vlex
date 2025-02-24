@@ -5,11 +5,19 @@
 
 #include "lexer/Token.h"
 
+#include <optional>
 #include <string>
 #include <vector>
 
 namespace parser
 {
+    struct TokenDescriptor
+    {
+        std::string syntax;
+
+        std::optional<std::string> tokenType;
+    };
+
     class Parser
     {
     public:
@@ -17,17 +25,17 @@ namespace parser
 
         void parse();
 
-        std::vector<std::string> getSymbols();
-        std::vector<std::string> getKeywords();
-        std::vector<std::string> getSpecials();
+        std::vector<TokenDescriptor> getSymbols();
+        std::vector<TokenDescriptor> getKeywords();
+        std::vector<TokenDescriptor> getSpecials();
 
     private:
         std::vector<lexer::Token> mTokens;
         unsigned int mPosition;
 
-        std::vector<std::string> mSymbols;
-        std::vector<std::string> mKeywords;
-        std::vector<std::string> mSpecials;
+        std::vector<TokenDescriptor> mSymbols;
+        std::vector<TokenDescriptor> mKeywords;
+        std::vector<TokenDescriptor> mSpecials;
 
         lexer::Token current() const;
         lexer::Token consume();

@@ -9,19 +9,24 @@
 #include <string>
 #include <vector>
 
+namespace parser
+{
+    struct TokenDescriptor;
+}
+
 namespace generator
 {
     class Generator
     {
     public:
-        Generator(std::vector<std::string> symbols, std::vector<std::string> keywords, std::vector<std::string> specials);
+        Generator(std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials);
 
         void generate(std::filesystem::path outsource, std::filesystem::path outinc);
 
     private:
-        std::vector<std::string> mSymbols;
-        std::vector<std::string> mKeywords;
-        std::vector<std::string> mSpecials;
+        std::vector<parser::TokenDescriptor> mSymbols;
+        std::vector<parser::TokenDescriptor> mKeywords;
+        std::vector<parser::TokenDescriptor> mSpecials;
 
         std::vector<std::unique_ptr<Symbol> > mSymbolNodes;
 

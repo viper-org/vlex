@@ -10,14 +10,16 @@ namespace generator
 {
     struct Symbol
     {
-        Symbol(std::string text, std::vector<Symbol*> children, Symbol* parent)
+        Symbol(std::string text, std::string tokenType, std::vector<Symbol*> children, Symbol* parent)
             : text(std::move(text))
+            , tokenType(tokenType)
             , children(std::move(children))
             , parent(parent)
         {
         }
 
         std::string text;
+        std::string tokenType;
         std::vector<Symbol*> children;
         Symbol* parent;
         bool error = false;

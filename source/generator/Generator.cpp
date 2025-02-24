@@ -92,6 +92,20 @@ namespace generator
         generateSourceLocation(outsource, outinc);
         generateToken(outsource, outinc);
         generateLexer(outsource, outinc);
+
+        std::filesystem::remove(outinc / ".gitignore");
+        std::filesystem::remove(outsource / ".gitignore");
+        
+        std::ofstream incGitignore = std::ofstream(outinc / ".gitignore", std::ios::app);
+        incGitignore << R"(Token.h
+Lexer.h
+SourceLocation.h
+)";
+        std::ofstream srcGitignore = std::ofstream(outsource / ".gitignore", std::ios::app);
+        srcGitignore << R"(Token.cpp
+Lexer.cpp
+SourceLocation.cpp
+)";
     }
 
     void Generator::generateSourceLocation(std::filesystem::path outsource, std::filesystem::path outinc)

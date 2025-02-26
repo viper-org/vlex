@@ -39,7 +39,7 @@ function(vlex_generate target cfg src inc)
         PRE_BUILD
         DEPENDS ${cfg}
         COMMAND vlex ${cfg} ${src} ${inc}
-        WORKING_DIRECTORY working_dir
+        WORKING_DIRECTORY ${working_dir}
     )
     target_sources(${target} PRIVATE ${inc}/Lexer.h ${src}/Lexer.cpp ${inc}/SourceLocation.h ${src}/SourceLocation.cpp ${inc}/Token.h ${src}/Token.cpp)
 endfunction()

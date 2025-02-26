@@ -141,7 +141,14 @@ namespace parser
 
         if (text[0] == '_') // Special case
         {
-            mSpecials.push_back({ text, tokenType });
+            if (text == "_right_brace")
+            {
+                mSymbols.push_back({ "}", tokenType });
+            }
+            else
+            {
+                mSpecials.push_back({ text, tokenType });
+            }
         }
         else
         {

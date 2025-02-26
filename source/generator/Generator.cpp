@@ -23,6 +23,13 @@
 #include <iostream>
 #include <unordered_map>
 
+namespace english {
+    std::string_view getIndefiniteArticle(std::string_view word) {
+        auto firstChar = std::tolower(word[0]);
+        return (firstChar == 'a' || firstChar == 'e' || firstChar == 'i' || firstChar == 'o' || firstChar == 'u') ? "an" : "a";
+    }
+}
+
 namespace generator
 {
     Generator::Generator(std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials)
@@ -241,8 +248,10 @@ namespace lexer
 
         std::ofstream tokenCPP = std::ofstream(outsource / "Token.cpp");
         tokenCPP << std::format("#include \"{}\"\n", (outinc / "Token.h").string());
-        tokenCPP << templates::Token1CPP;
-        for (auto keyword : mKeywords)
+
+        std::unordered_map<std::string, std::string> names;
+
+        for (auto& keyword : mKeywords)
         {
             std::string tokenType;
             if (keyword.tokenType)
@@ -255,8 +264,22 @@ namespace lexer
                 tokenType[0] = toupper(keyword.syntax[0]);
                 tokenType += "Keyword";
             }
-            tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", tokenType, keyword.syntax);
+
+            auto it = names.find(tokenType);
+            if (it != names.end()) {
+                std::string value = std::string(english::getIndefiniteArticle(tokenType));
+                value += " ";
+                value += tokenType;
+
+                std::transform(value.begin(), value.end(), value.begin(),
+                               [](auto c){ return std::tolower(c); });
+
+                it->second = std::move(value);
+            } else {
+                names[tokenType] = keyword.syntax;
+            }
         }
+
         for (auto& symbol : mSymbols)
         {
             std::string tokenType;
@@ -268,25 +291,109 @@ namespace lexer
             {
                 tokenType = symbolToName(symbol.syntax);
             }
-            tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", tokenType, symbol.syntax);
+
+            auto it = names.find(tokenType);
+            if (it != names.end()) {
+                std::string value = std::string(english::getIndefiniteArticle(tokenType));
+                value += " ";
+                value += tokenType;
+
+                std::transform(value.begin(), value.end(), value.begin(),
+                               [](auto c){ return std::tolower(c); });
+
+                it->second = std::move(value);
+            } else {
+                names[tokenType] = symbol.syntax;
+            }
         }
+
         for (auto& special : mSpecials)
         {
             if (special.syntax == "_identifier")
             {
-                tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"an identifier\";\n", special.tokenType?*special.tokenType:"Identifier");
+                std::string tokenType;
+                if (special.tokenType)
+                {
+                    tokenType = *special.tokenType;
+                }
+                else
+                {
+                    tokenType = "Identifier";
+                }
+
+                auto it = names.find(tokenType);
+                if (it != names.end()) {
+                    std::string value = std::string(english::getIndefiniteArticle(tokenType));
+                    value += " ";
+                    value += tokenType;
+
+                    std::transform(value.begin(), value.end(), value.begin(),
+                                   [](auto c){ return std::tolower(c); });
+
+                    it->second = std::move(value);
+                } else {
+                    names[tokenType] = "an identifier";
+                }
             }
             else if (special.syntax == "_integer_literal")
             {
-                tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"integer literal\";\n", special.tokenType?*special.tokenType:"IntegerLiteral");
+                std::string tokenType;
+                if (special.tokenType)
+                {
+                    tokenType = *special.tokenType;
+                }
+                else
+                {
+                    tokenType = "IntegerLiteral";
+                }
+
+                auto it = names.find(tokenType);
+                if (it != names.end()) {
+                    std::string value = std::string(english::getIndefiniteArticle(tokenType));
+                    value += " ";
+                    value += tokenType;
+
+                    std::transform(value.begin(), value.end(), value.begin(),
+                                   [](auto c){ return std::tolower(c); });
+
+                    it->second = std::move(value);
+                } else {
+                    names[tokenType] = "an integer literal";
+                }
             }
             else if (special.syntax == "_string_literal")
             {
-                tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"string literal\";\n", special.tokenType?*special.tokenType:"StringLiteral");
+                std::string tokenType;
+                if (special.tokenType)
+                {
+                    tokenType = *special.tokenType;
+                }
+                else
+                {
+                    tokenType = "StringLiteral";
+                }
+
+                auto it = names.find(tokenType);
+                if (it != names.end()) {
+                    std::string value = std::string(english::getIndefiniteArticle(tokenType));
+                    value += " ";
+                    value += tokenType;
+
+                    std::transform(value.begin(), value.end(), value.begin(),
+                                   [](auto c){ return std::tolower(c); });
+
+                    it->second = std::move(value);
+                } else {
+                    names[tokenType] = "a string literal";
+                }
             }
         }
-        tokenCPP << "\t\t\tcase TokenType::EndOfFile:\n\t\t\t\treturn \"eof\";\n";
-        tokenCPP << "\t\t\tcase TokenType::Error:\n\t\t\t\treturn \"Error\";\n";
+
+        tokenCPP << templates::Token1CPP;
+
+        for (auto& it : names) {
+            tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", it.first, it.second);
+        }
 
         tokenCPP << templates::Token2CPP;
         tokenCPP.close();

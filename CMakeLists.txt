@@ -34,6 +34,17 @@ target_compile_features(vlex PRIVATE cxx_std_20)
 
 function(vlex_generate target cfg src inc)
     get_target_property(working_dir ${target} SOURCE_DIR)
+
+    if (IS_ABSOLUTE ${src})
+    else()
+        set(src ${working_dir}/${src})
+    endif()
+
+    if (IS_ABSOLUTE ${inc})
+    else()
+        set(inc ${working_dir}/${inc})
+    endif()
+
     add_custom_command(
         OUTPUT ${inc}/Lexer.h ${src}/Lexer.cpp ${inc}/SourceLocation.h ${src}/SourceLocation.cpp ${inc}/Token.h ${src}/Token.cpp
         PRE_BUILD

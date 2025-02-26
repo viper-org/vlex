@@ -99,7 +99,7 @@ namespace parser
     void Parser::parseSymbol()
     {
         std::string text;
-        while (current().getTokenType() == lexer::TokenType::Symbol)
+        while (current().getTokenType() == lexer::TokenType::Symbol || current().getTokenType() == lexer::TokenType::LeftBrace || current().getTokenType() == lexer::TokenType::RightBrace)
         {
             text += std::string(consume().getText());
         }

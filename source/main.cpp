@@ -7,6 +7,7 @@
 
 #include "generator/Generator.h"
 
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -16,21 +17,31 @@ int main(int argc, char** argv)
 {
     if (argc < 4)
     {
-        std::cerr << "vlex: incorrect input\n";
+        std::ofstream log("vlex.log");
+        log << "vlex: incorrect input\n";
         return 1;
     }
 
     std::string inputPath = argv[1];
     std::ifstream inputFile = std::ifstream(inputPath);
+    if (!inputFile.is_open())
+    {
+        std::ofstream log("vlex.log");
+        log << std::format("vlex: file {} not found\n", inputPath);
+        return 1;
+    }
 
     std::stringstream buf;
     buf << inputFile.rdbuf();
-    std::string text = std::move(buf).str();
+    std::string text = buf.str();
 
     lexer::Lexer lexer(text, inputPath);
     auto tokens = lexer.lex();
 
-    parser::Parser parser(std::move(tokens));
+    diagnostic::Diagnostics diag;
+    diag.setText(text);
+
+    parser::Parser parser(std::move(tokens), diag);
     parser.parse();
 
     auto generator = generator::Generator(parser.getSymbols(), parser.getKeywords(), parser.getSpecials());

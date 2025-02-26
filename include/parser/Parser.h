@@ -5,6 +5,8 @@
 
 #include "lexer/Token.h"
 
+#include "diagnostic/Diagnostic.h"
+
 #include <optional>
 #include <string>
 #include <vector>
@@ -21,7 +23,7 @@ namespace parser
     class Parser
     {
     public:
-        Parser(std::vector<lexer::Token> tokens);
+        Parser(std::vector<lexer::Token> tokens, diagnostic::Diagnostics& diag);
 
         void parse();
 
@@ -36,6 +38,8 @@ namespace parser
         std::vector<TokenDescriptor> mSymbols;
         std::vector<TokenDescriptor> mKeywords;
         std::vector<TokenDescriptor> mSpecials;
+
+        diagnostic::Diagnostics& mDiag;
 
         lexer::Token current() const;
         lexer::Token consume();

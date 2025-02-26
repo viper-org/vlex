@@ -2,11 +2,14 @@
 
 #include "parser/Parser.h"
 
+#include <format>
+
 namespace parser
 {
-    Parser::Parser(std::vector<lexer::Token> tokens)
+    Parser::Parser(std::vector<lexer::Token> tokens, diagnostic::Diagnostics& diag)
         : mTokens(std::move(tokens))
         , mPosition(0)
+        , mDiag(diag)
     {
     }
 
@@ -50,7 +53,15 @@ namespace parser
     {
         if (current().getTokenType() != tokenType)
         {
-            std::exit(1); // TODO: Print error
+            lexer::Token temp("", tokenType, {}, {});
+            mDiag.reportCompilerError(
+                current().getStartLocation(),
+                current().getEndLocation(),
+                std::format("Expected '{}{}{}', found '{}{}{}'",
+                    fmt::bold, temp.getName(), fmt::defaults,
+                    fmt::bold, current().getText(), fmt::defaults)
+            );
+            std::exit(1);
         }
     }
 
@@ -67,6 +78,12 @@ namespace parser
             switch (current().getTokenType())
             {
                 case lexer::TokenType::TokensKeyword:
+                    mDiag.reportCompilerError(
+                        current().getStartLocation(),
+                        current().getEndLocation(),
+                        std::format("Expected token, found '{}{}{}'",
+                            fmt::bold, current().getText(), fmt::defaults)
+                    );
                     std::exit(1); // TODO: Error
 
                 case lexer::TokenType::LeftBrace:

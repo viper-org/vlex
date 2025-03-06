@@ -445,7 +445,7 @@ namespace lexer
         }
 
         lexerCPP << R"(
-        if (std::isspace(current())
+        if (std::isspace(current()))
             return std::nullopt;
 )";
 

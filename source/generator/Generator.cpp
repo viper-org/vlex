@@ -12,6 +12,7 @@
 #include "templates/LexerH.h"
 #include "templates/SourceLocationCPP.h"
 #include "templates/SourceLocationH.h"
+#include "templates/StringLiteralParseCPP.h"
 #include "templates/Token1CPP.h"
 #include "templates/Token2CPP.h"
 #include "templates/TokenH.h"
@@ -465,7 +466,10 @@ namespace lexer
             {
                 stream << std::format(templates::IntegerLiteralParseCPP, special.tokenType?*special.tokenType:"IntegerLiteral");
             }
-            // TODO: String Literals
+            else if (special.syntax == "_string_literal")
+            {
+                stream << std::format(templates::StringLiteralParseCPP, special.tokenType?*special.tokenType:"StringLiteral");
+            }
         }
     }
 

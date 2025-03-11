@@ -445,6 +445,11 @@ namespace lexer
             lexerCPP << templates::KeywordParseCPP;
         }
 
+        lexerCPP << R"(
+        if (std::isspace(current()))
+            return std::nullopt;
+)";
+
         generateSymbols(lexerCPP);
         lexerCPP << "\n\t}\n}";
     }

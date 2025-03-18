@@ -7,6 +7,7 @@ namespace templates
     class Token
     {
     public:
+        Token() = default;
         Token(std::string text, TokenType tokenType, SourceLocation startLocation, SourceLocation endLocation);
 
         std::string_view getText() const;

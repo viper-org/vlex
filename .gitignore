@@ -3,7 +3,8 @@ CMakeFiles/
 
 *.cmake
 Makefile
+*.json
+*.log
 
 vlex
 CMakeCache.txt
-*.json

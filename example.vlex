@@ -1,6 +1,7 @@
 tokens {
     +
     -
+    ->
     func FUNCTION
     fn FUNCTION
     _integer_literal INTS

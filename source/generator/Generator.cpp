@@ -30,9 +30,9 @@ namespace generator
         , mKeywords(std::move(keywords))
         , mSpecials(std::move(specials))
     {
-        //std::sort(mSymbols.begin(), mSymbols.end(), [](auto& a, auto& b) {
-        //    return a.syntax <=> b.syntax == std::strong_ordering::less;
-        //});
+        std::sort(mSymbols.begin(), mSymbols.end(), [](auto& a, auto& b) {
+            return a.syntax <=> b.syntax == std::strong_ordering::less;
+        });
         for (auto& symbol : mSymbols)
         {
             if (symbol.syntax.size() == 1)

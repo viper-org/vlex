@@ -17,6 +17,11 @@ namespace parser
     {
         parseTokens();
     }
+
+    std::string Parser::getNamespaceName() const
+    {
+        return mNamespaceName;
+    }
     
     std::vector<TokenDescriptor> Parser::getSymbols()
     {
@@ -69,6 +74,10 @@ namespace parser
     {
         expectToken(lexer::TokenType::TokensKeyword);
         consume();
+        
+        expectToken(lexer::TokenType::Identifier);
+        std::string name(consume().getText());
+        mNamespaceName = std::move(name);
 
         expectToken(lexer::TokenType::LeftBrace);
         consume();

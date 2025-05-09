@@ -27,6 +27,7 @@ namespace parser
 
         void parse();
 
+        std::string getNamespaceName() const;
         std::vector<TokenDescriptor> getSymbols();
         std::vector<TokenDescriptor> getKeywords();
         std::vector<TokenDescriptor> getSpecials();
@@ -35,6 +36,7 @@ namespace parser
         std::vector<lexer::Token> mTokens;
         unsigned int mPosition;
 
+        std::string mNamespaceName;
         std::vector<TokenDescriptor> mSymbols;
         std::vector<TokenDescriptor> mKeywords;
         std::vector<TokenDescriptor> mSpecials;

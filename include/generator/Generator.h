@@ -19,11 +19,12 @@ namespace generator
     class Generator
     {
     public:
-        Generator(std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials);
+        Generator(std::string namespaceName, std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials);
 
         void generate(std::filesystem::path outsource, std::filesystem::path outinc);
 
     private:
+        std::string mNamespaceName;
         std::vector<parser::TokenDescriptor> mSymbols;
         std::vector<parser::TokenDescriptor> mKeywords;
         std::vector<parser::TokenDescriptor> mSpecials;

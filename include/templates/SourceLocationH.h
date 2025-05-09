@@ -8,10 +8,10 @@ namespace templates
 
 #include <string_view>
 
-namespace lexer
-{
+namespace {}::lexer
+{{
     struct SourceLocation
-    {
+    {{
         SourceLocation() = default;
         SourceLocation(std::string_view file, unsigned int line, unsigned int col, unsigned int position);
 
@@ -20,8 +20,8 @@ namespace lexer
         unsigned int line;
         unsigned int col;
         unsigned int position;
-    };
-}
+    }};
+}}
 
 #endif // VLEX_GENERATED_LEXER_SOURCE_LOCATION_H)";
 }

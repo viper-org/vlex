@@ -9,12 +9,12 @@ namespace templates
 #include <string>
 #include <vector>
 
-namespace lexer
-{
+namespace {}::lexer
+{{
     class Token;
 
     class Lexer
-    {
+    {{
     public:
         Lexer(std::string_view text, std::string_view fileName);
 
@@ -35,11 +35,11 @@ namespace lexer
         std::optional<Token> getNextToken();
 
 
-        static inline bool isIdentifierStart(char c) { return std::isalpha(c) || c == '_'; }
-        static inline bool isIdentifier(char c)      { return std::isalnum(c) || c == '_'; }
-        static inline bool isDigitSeparator(char c)  { return c == '_'; }
-    };
-}
+        static inline bool isIdentifierStart(char c) {{ return std::isalpha(c) || c == '_'; }}
+        static inline bool isIdentifier(char c)      {{ return std::isalnum(c) || c == '_'; }}
+        static inline bool isDigitSeparator(char c)  {{ return c == '_'; }}
+    }};
+}}
 
 #endif // VLEX_GENERATED_LEXER_LEXER_H)";
 }

@@ -36,7 +36,7 @@ namespace templates
                 value = current();
             }}
 
-            if (current != '\'')
+            if (current() != '\'')
             {{
                 return Token(std::string(1, value), TokenType::Error, start, mSourceLocation);
             }}

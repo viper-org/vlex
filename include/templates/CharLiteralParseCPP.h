@@ -41,7 +41,7 @@ namespace templates
                 return Token(std::string(1, value), TokenType::Error, start, mSourceLocation);
             }}
             consume();
-            return Token(std::move(text), TokenType::{}, start, mSourceLocation);
+            return Token(std::string(1, value), TokenType::{}, start, mSourceLocation);
         }}
 )";
 }

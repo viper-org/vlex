@@ -13,6 +13,7 @@
 #include "templates/SourceLocationCPP.h"
 #include "templates/SourceLocationH.h"
 #include "templates/StringLiteralParseCPP.h"
+#include "templates/CharLiteralParseCPP.h"
 #include "templates/Token1CPP.h"
 #include "templates/Token2CPP.h"
 #include "templates/TokenH.h"
@@ -227,6 +228,10 @@ namespace {}::lexer
             {
                 tokenType = special.tokenType?*special.tokenType:"StringLiteral";
             }
+            else if (special.syntax == "_character_literal")
+            {
+                tokenType = special.tokenType?*special.tokenType:"CharacterLiteral";
+            }
             else
             {
                 std::cerr << "Unknown special identifier " << special.syntax << "\n";
@@ -389,6 +394,32 @@ namespace {}::lexer
                     names[tokenType] = "a string literal";
                 }
             }
+            else if (special.syntax == "_character_literal")
+            {
+                std::string tokenType;
+                if (special.tokenType)
+                {
+                    tokenType = *special.tokenType;
+                }
+                else
+                {
+                    tokenType = "CharacterLiteral";
+                }
+
+                auto it = names.find(tokenType);
+                if (it != names.end()) {
+                    std::string value = std::string(english::getIndefiniteArticle(tokenType));
+                    value += " ";
+                    value += tokenType;
+
+                    std::transform(value.begin(), value.end(), value.begin(),
+                                   [](auto c){ return std::tolower(c); });
+
+                    it->second = std::move(value);
+                } else {
+                    names[tokenType] = "a character literal";
+                }
+            }
         }
 
         tokenCPP << std::vformat(templates::Token1CPP, std::make_format_args(mNamespaceName));
@@ -470,6 +501,10 @@ namespace {}::lexer
             else if (special.syntax == "_string_literal")
             {
                 stream << std::format(templates::StringLiteralParseCPP, special.tokenType?*special.tokenType:"StringLiteral");
+            }
+            else if (special.syntax == "_character_literal")
+            {
+                stream << std::format(templates::CharLiteralParseCPP, special.tokenType?*special.tokenType:"CharacterLiteral");
             }
         }
     }

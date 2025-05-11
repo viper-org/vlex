@@ -30,6 +30,7 @@ namespace templates
                         value = '\0';
                         break;
                 }}
+                consume();
             }}
             else
             {{
@@ -40,7 +41,6 @@ namespace templates
             {{
                 return Token(std::string(1, value), TokenType::Error, start, mSourceLocation);
             }}
-            consume();
             return Token(std::string(1, value), TokenType::{}, start, mSourceLocation);
         }}
 )";

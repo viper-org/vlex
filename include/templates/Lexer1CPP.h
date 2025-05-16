@@ -7,7 +7,7 @@ namespace templates
 #include <format>
 #include <unordered_map>
 
-namespace {}::lexer
+namespace {}{}lexer
 {{
     Lexer::Lexer(std::string_view text, std::string_view fileName)
         : mText(text)

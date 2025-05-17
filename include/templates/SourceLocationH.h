@@ -8,7 +8,7 @@ namespace templates
 
 #include <string_view>
 
-namespace {}::lexer
+namespace {}{}lexer
 {{
     struct SourceLocation
     {{

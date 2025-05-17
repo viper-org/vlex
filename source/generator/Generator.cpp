@@ -154,12 +154,12 @@ SourceLocation.cpp
     void Generator::generateSourceLocation(std::filesystem::path outsource, std::filesystem::path outinc)
     {
         std::ofstream sourceLocationH = std::ofstream(outinc / "SourceLocation.h");
-        sourceLocationH << std::vformat(templates::SourceLocationH, std::make_format_args(mNamespaceName));
+        sourceLocationH << std::vformat(templates::SourceLocationH, std::make_format_args(mNamespaceName, mNamespaceName.empty() ? "" : "::"));
         sourceLocationH.close();
 
         std::ofstream sourceLocationCPP = std::ofstream(outsource / "SourceLocation.cpp");
         sourceLocationCPP << std::format("#include \"{}\"\n", (outinc / "SourceLocation.h").string());
-        sourceLocationCPP << std::vformat(templates::SourceLocationCPP, std::make_format_args(mNamespaceName));
+        sourceLocationCPP << std::vformat(templates::SourceLocationCPP, std::make_format_args(mNamespaceName, mNamespaceName.empty() ? "" : "::"));
         sourceLocationCPP.close();
     }
 
@@ -173,11 +173,11 @@ SourceLocation.cpp
 
 #include <string>
 
-namespace {}::lexer
+namespace {}{}lexer
 {{
     enum class TokenType
     {{
-)", (outinc / "SourceLocation.h").string(), mNamespaceName);
+)", (outinc / "SourceLocation.h").string(), mNamespaceName, mNamespaceName.empty() ? "" : "::");
 
         std::vector<std::string> tokenTypes;
         for (auto& keyword : mKeywords)
@@ -422,7 +422,7 @@ namespace {}::lexer
             }
         }
 
-        tokenCPP << std::vformat(templates::Token1CPP, std::make_format_args(mNamespaceName));
+        tokenCPP << std::vformat(templates::Token1CPP, std::make_format_args(mNamespaceName, mNamespaceName.empty() ? "" : "::"));
 
         for (auto& it : names) {
             tokenCPP << std::format("\t\t\tcase TokenType::{}:\n\t\t\t\treturn \"{}\";\n", it.first, it.second);
@@ -440,7 +440,7 @@ namespace {}::lexer
 
 #include "{}"
 )", (outinc / "SourceLocation.h").string());
-        lexerH << std::vformat(templates::LexerH, std::make_format_args(mNamespaceName));
+        lexerH << std::vformat(templates::LexerH, std::make_format_args(mNamespaceName, mNamespaceName.empty() ? "" : "::"));
         lexerH.close();
 
 
@@ -448,7 +448,7 @@ namespace {}::lexer
         lexerCPP << std::format(R"(#include "{}"
 #include "{}"
 )", (outinc / "Lexer.h").string(), (outinc / "Token.h").string());
-        lexerCPP << std::vformat(templates::Lexer1CPP, std::make_format_args(mNamespaceName));
+        lexerCPP << std::vformat(templates::Lexer1CPP, std::make_format_args(mNamespaceName, mNamespaceName.empty() ? "" : "::"));
 
         for (auto& keyword : mKeywords)
         {

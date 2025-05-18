@@ -44,6 +44,6 @@ int main(int argc, char** argv)
     parser::Parser parser(std::move(tokens), diag);
     parser.parse();
 
-    auto generator = generator::Generator(parser.getNamespaceName(), parser.getSymbols(), parser.getKeywords(), parser.getSpecials());
+    auto generator = generator::Generator(parser.getNamespaceName(), parser.getSymbols(), parser.getKeywords(), parser.getSpecials(), parser.getComments());
     generator.generate(argv[2], argv[3]);
 }

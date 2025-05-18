@@ -20,6 +20,12 @@ namespace parser
         std::optional<std::string> tokenType;
     };
 
+    struct CommentDescriptor
+    {
+        std::string open;
+        std::string close;
+    };
+
     class Parser
     {
     public:
@@ -31,6 +37,7 @@ namespace parser
         std::vector<TokenDescriptor> getSymbols();
         std::vector<TokenDescriptor> getKeywords();
         std::vector<TokenDescriptor> getSpecials();
+        std::vector<CommentDescriptor> getComments();
 
     private:
         std::vector<lexer::Token> mTokens;
@@ -40,6 +47,7 @@ namespace parser
         std::vector<TokenDescriptor> mSymbols;
         std::vector<TokenDescriptor> mKeywords;
         std::vector<TokenDescriptor> mSpecials;
+        std::vector<CommentDescriptor> mComments;
 
         diagnostic::Diagnostics& mDiag;
 
@@ -50,6 +58,7 @@ namespace parser
         void expectToken(lexer::TokenType tokenType);
 
         void parseTokens();
+        void parseComments();
 
         void parseSymbol();
         void parseIdentifier();

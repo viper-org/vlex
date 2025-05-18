@@ -12,6 +12,7 @@
 namespace parser
 {
     struct TokenDescriptor;
+    struct CommentDescriptor;
 }
 
 namespace generator
@@ -19,7 +20,7 @@ namespace generator
     class Generator
     {
     public:
-        Generator(std::string namespaceName, std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials);
+        Generator(std::string namespaceName, std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials, std::vector<parser::CommentDescriptor> comments);
 
         void generate(std::filesystem::path outsource, std::filesystem::path outinc);
 
@@ -28,6 +29,7 @@ namespace generator
         std::vector<parser::TokenDescriptor> mSymbols;
         std::vector<parser::TokenDescriptor> mKeywords;
         std::vector<parser::TokenDescriptor> mSpecials;
+        std::vector<parser::CommentDescriptor> mComments;
 
         std::vector<std::unique_ptr<Symbol> > mSymbolNodes;
 

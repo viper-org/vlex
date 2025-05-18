@@ -12,6 +12,8 @@ namespace lexer
     enum class TokenType
     {
         TokensKeyword,
+        CommentsKeyword,
+        CloseKeyword,
 
         LeftBrace, RightBrace,
 

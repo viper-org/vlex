@@ -34,11 +34,12 @@ namespace english {
 
 namespace generator
 {
-    Generator::Generator(std::string mNamespaceName, std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials)
+    Generator::Generator(std::string mNamespaceName, std::vector<parser::TokenDescriptor> symbols, std::vector<parser::TokenDescriptor> keywords, std::vector<parser::TokenDescriptor> specials, std::vector<parser::CommentDescriptor> comments)
         : mNamespaceName(std::move(mNamespaceName))    
         , mSymbols(std::move(symbols))
         , mKeywords(std::move(keywords))
         , mSpecials(std::move(specials))
+        , mComments(std::move(comments))
     {
         std::sort(mSymbols.begin(), mSymbols.end(), [](auto& a, auto& b) {
             return a.syntax <=> b.syntax == std::strong_ordering::less;
@@ -481,6 +482,32 @@ namespace {}::lexer
         if (std::isspace(current()))
             return std::nullopt;
 )";
+
+        for (auto& comment : mComments)
+        {
+            if (comment.close.empty())
+            {
+                lexerCPP << std::format(R"(
+        if (mText.substr(0, {0}) == "{1}")
+        {{
+            mPosition += {0};
+            while (current() != '\n') consume();
+            consume();
+            return std::nullopt;
+        }})", comment.open.length(), comment.open);
+            }
+            else
+            {
+                lexerCPP << std::format(R"(
+        if (mText.substr(mPosition, {0}) == "{1}")
+        {{
+            mPosition += {0};
+            while (mText.substr(mPosition, {2}) != "{3}") consume();
+            mPosition += {4};
+            return std::nullopt;
+        }})", comment.open.length(), comment.open, comment.close.length(), comment.close, comment.close.length()-1);
+            }
+        }
 
         generateSymbols(lexerCPP);
         lexerCPP << "\n\t}\n}";

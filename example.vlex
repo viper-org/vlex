@@ -11,3 +11,8 @@ tokens {
     _string_literal
     _character_literal
 }
+
+comments {
+    //
+    /* close */
+}

@@ -15,7 +15,35 @@ namespace parser
 
     void Parser::parse()
     {
-        parseTokens();
+        while (mPosition < mTokens.size())
+        {
+            switch (current().getTokenType())
+            {
+                case lexer::TokenType::TokensKeyword:
+                    parseTokens();
+                    break;
+                
+                case lexer::TokenType::CommentsKeyword:
+                    parseComments();
+                    break;
+
+                case lexer::TokenType::Newline:
+                    consume();
+                    break;
+
+                case lexer::TokenType::EndOfFile:
+                    return;
+
+                default:
+                    mDiag.reportCompilerError(
+                        current().getStartLocation(),
+                        current().getEndLocation(),
+                        std::format("Expected global statement, found '{}{}{}'",
+                            fmt::bold, current().getText(), fmt::defaults)
+                    );
+                    std::exit(1);
+            }
+        }
     }
 
     std::string Parser::getNamespaceName() const
@@ -36,6 +64,11 @@ namespace parser
     std::vector<TokenDescriptor> Parser::getSpecials()
     {
         return mSpecials;
+    }
+
+    std::vector<CommentDescriptor> Parser::getComments()
+    {
+        return mComments;
     }
 
 
@@ -87,15 +120,6 @@ namespace parser
         {
             switch (current().getTokenType())
             {
-                case lexer::TokenType::TokensKeyword:
-                    mDiag.reportCompilerError(
-                        current().getStartLocation(),
-                        current().getEndLocation(),
-                        std::format("Expected token, found '{}{}{}'",
-                            fmt::bold, current().getText(), fmt::defaults)
-                    );
-                    std::exit(1); // TODO: Error
-
                 case lexer::TokenType::LeftBrace:
                     parseSymbol();
                     break;
@@ -112,8 +136,57 @@ namespace parser
                 case lexer::TokenType::EndOfFile:
                 case lexer::TokenType::Newline:
                     break;
+
+
+                default:
+                    mDiag.reportCompilerError(
+                        current().getStartLocation(),
+                        current().getEndLocation(),
+                        std::format("Expected token, found '{}{}{}'",
+                            fmt::bold, current().getText(), fmt::defaults)
+                    );
+                    std::exit(1);
             }
 
+            if (current().getTokenType() != lexer::TokenType::RightBrace)
+            {
+                expectToken(lexer::TokenType::Newline);
+                consume();
+            }
+        }
+        consume();
+    }
+
+    void Parser::parseComments()
+    {
+        consume(); // comments
+
+        expectToken(lexer::TokenType::LeftBrace);
+        consume();
+        expectToken(lexer::TokenType::Newline);
+        consume();
+
+        while (current().getTokenType() != lexer::TokenType::RightBrace)
+        {
+            expectToken(lexer::TokenType::Symbol);
+            std::string start;
+            std::string end;
+            while (current().getTokenType() == lexer::TokenType::Symbol)
+            {
+                start += consume().getText();
+            }
+
+            if (current().getTokenType() == lexer::TokenType::CloseKeyword)
+            {
+                consume();
+                expectToken(lexer::TokenType::Symbol);
+                while (current().getTokenType() == lexer::TokenType::Symbol)
+                {
+                    end += consume().getText();
+                }
+            }
+
+            mComments.push_back({start, end});
             if (current().getTokenType() != lexer::TokenType::RightBrace)
             {
                 expectToken(lexer::TokenType::Newline);

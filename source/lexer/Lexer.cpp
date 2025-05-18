@@ -3,7 +3,6 @@
 #include "lexer/Lexer.h"
 #include "lexer/Token.h"
 
-#include <format>
 #include <unordered_map>
 
 namespace lexer
@@ -18,6 +17,8 @@ namespace lexer
 
     static const std::unordered_map<std::string_view, TokenType> keywords = {
         { "tokens", TokenType::TokensKeyword },
+        { "comments", TokenType::CommentsKeyword },
+        { "close", TokenType::CloseKeyword }
     };
 
 

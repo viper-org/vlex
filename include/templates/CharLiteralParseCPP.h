@@ -34,7 +34,7 @@ namespace templates
             }}
             else
             {{
-                value = current();
+                value = consume();
             }}
 
             if (current() != '\'')

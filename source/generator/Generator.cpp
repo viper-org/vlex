@@ -488,11 +488,10 @@ namespace {}::lexer
             if (comment.close.empty())
             {
                 lexerCPP << std::format(R"(
-        if (mText.substr(0, {0}) == "{1}")
+        if (mText.substr(mPosition, {0}) == "{1}")
         {{
             mPosition += {0};
             while (current() != '\n') consume();
-            consume();
             return std::nullopt;
         }})", comment.open.length(), comment.open);
             }

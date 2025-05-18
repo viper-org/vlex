@@ -490,7 +490,7 @@ namespace {}::lexer
                 lexerCPP << std::format(R"(
         if (mText.substr(mPosition, {0}) == "{1}")
         {{
-            mPosition += {0};
+            for (int i = 0; i < {0}; ++i) consume();
             while (current() != '\n') consume();
             return std::nullopt;
         }})", comment.open.length(), comment.open);
@@ -500,9 +500,9 @@ namespace {}::lexer
                 lexerCPP << std::format(R"(
         if (mText.substr(mPosition, {0}) == "{1}")
         {{
-            mPosition += {0};
+            for (int i = 0; i < {0}; ++i) consume();
             while (mText.substr(mPosition, {2}) != "{3}") consume();
-            mPosition += {4};
+            for (int i = 0; i < {4}; ++i) consume();
             return std::nullopt;
         }})", comment.open.length(), comment.open, comment.close.length(), comment.close, comment.close.length()-1);
             }

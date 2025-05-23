@@ -9,7 +9,7 @@ namespace templates
 #include <string>
 #include <vector>
 
-namespace {}::lexer
+namespace {}{}lexer
 {{
     class Token;
 

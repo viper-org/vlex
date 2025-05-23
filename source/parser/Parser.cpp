@@ -107,10 +107,11 @@ namespace parser
     {
         expectToken(lexer::TokenType::TokensKeyword);
         consume();
-        
-        expectToken(lexer::TokenType::Identifier);
-        std::string name(consume().getText());
-        mNamespaceName = std::move(name);
+
+        if (current().getTokenType() == lexer::TokenType::Identifier) {
+            std::string name(consume().getText());
+            mNamespaceName = std::move(name);
+        }
 
         expectToken(lexer::TokenType::LeftBrace);
         consume();
